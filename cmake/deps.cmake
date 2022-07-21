@@ -10,10 +10,12 @@ endif()
 include_directories(${DEPS_PATHS})
 set(CMAKE_PREFIX_PATH "$ENV{HOME}/api/libtorch")
 
-find_package(Torch REQUIRED)
-include_directories(${TORCH_INCLUDE_DIR})
-include_directories(${TORCH_INCLUDE_DIR})
+find_package(PythonInterp REQUIRED)
 
+find_package(Torch REQUIRED)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+
+include_directories(${TORCH_INCLUDE_DIR})
 # Add subdirectory
 foreach(DEPS_PATH ${DEPS_PATHS})
     add_subdirectory(${DEPS_PATH})
