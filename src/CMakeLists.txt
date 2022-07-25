@@ -5,7 +5,6 @@ set(PROJECT_NAME cmake_test)
 set(PROJECT_LANGUAGE C CXX)
 set(PROJECT_DEPS
     ${TORCH_LIBRARIES}
-    kinematics
     )
 
 # Compile setting
@@ -23,13 +22,21 @@ file(GLOB PROJECT_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
     )
 
+file(GLOB PROJECT_LIB
+    ${CMAKE_CURRENT_SOURCE_DIR}/../lib/*.cpp
+    )
+
+include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}/../lib/
+    )
+
 # Build test
 foreach(TEST_FILE_PATH ${PROJECT_SRCS})
     # Get each file name
     get_filename_component(TEST_FILE_NAME ${TEST_FILE_PATH} NAME_WE)
 
     # Build executable
-    add_executable(${TEST_FILE_NAME} ${TEST_FILE_PATH})
+    add_executable(${TEST_FILE_NAME} ${TEST_FILE_PATH} ${PROJECT_LIB})
     set_target_properties(${TEST_FILE_NAME} PROPERTIES
         CXX_STANDARD 14
         OUTPUT_NAME ${TEST_FILE_NAME}

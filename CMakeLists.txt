@@ -8,7 +8,7 @@ if(" ${CMAKE_SOURCE_DIR}" STREQUAL " ${CMAKE_BINARY_DIR}")
 endif()
 
 # Set variables
-set(PROJECT_NAME obj_deg)
+set(PROJECT_NAME kinematics_poe_project)
 set(PROJECT_LANGUAGE C CXX)
 
 # Environment variables
@@ -28,17 +28,9 @@ endif()
 # Let ycm can catch compile commands.
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
-# Dependences paths
-set(DEPS_PATHS
-    )
-
-# Library paths
-set(LIB_PATHS
-    ${CMAKE_CURRENT_SOURCE_DIR}/lib/
-    )
 
 if(${BUILD_UTIL})
-    set(UTIL_PATHS ${UTIL_PATHS} ${CMAKE_CURRENT_SOURCE_DIR}/test)
+    set(UTIL_PATHS ${UTIL_PATHS} ${CMAKE_CURRENT_SOURCE_DIR}/src)
 endif()
 
 # Set project
@@ -46,6 +38,4 @@ project(${PROJECT_NAME} ${PROJECT_LANGUAGE})
 
 # Include cmake files
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/deps.cmake)
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/lib.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/util.cmake)
-

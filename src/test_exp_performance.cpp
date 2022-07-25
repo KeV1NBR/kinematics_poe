@@ -28,5 +28,11 @@ int main() {
     //    std::cout << tensor << std::endl;
     cout << double(end - now) / CLOCKS_PER_SEC << endl;
 
+    torch::Tensor t = torch::tensor({{0., 0., 0., 0.},
+                                     {0., 1., 0., 0.},
+                                     {0., 0., 0., 0.},
+                                     {0., 0., 0., 1.}});
+    cout << t << endl << t.matrix_exp();
+
     return 0;
 }
