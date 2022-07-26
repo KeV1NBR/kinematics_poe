@@ -20,4 +20,6 @@ class Kinematics {
 
     torch::Tensor* M;
     torch::Tensor* S;
+
+    torch::Tensor SCalculate(torch::Tensor SList);
 };
