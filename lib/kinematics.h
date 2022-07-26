@@ -4,8 +4,8 @@ class Kinematics {
    public:
     Kinematics();
     ~Kinematics();
-    std::vector<float> forward(const std::vector<float>& jointPosition);
-    std::vector<float> forward(const std::vector<float>& jointPosition,
+    std::vector<float> forward(std::vector<float> jointPosition);
+    std::vector<float> forward(std::vector<float> jointPosition,
                                torch::DeviceType device);
 
     void setDevice(torch::DeviceType device);

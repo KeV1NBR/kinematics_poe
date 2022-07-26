@@ -1,6 +1,9 @@
 #include "kinematics.h"
 
 #include <c10/core/DeviceType.h>
+#include <c10/core/ScalarType.h>
+#include <c10/core/TensorOptions.h>
+#include <torch/csrc/autograd/generated/variable_factories.h>
 
 #include <iostream>
 
@@ -59,7 +62,7 @@ Tensor TM_SList() {
 
 Kinematics::Kinematics() : device(DeviceType::CPU) {
     M_cpu = TM_M();
-    M_gpu = M_cpu.cuda();
+    //    M_gpu = M_cpu.cuda();
 
     Tensor SList = TM_SList();
 
@@ -72,16 +75,27 @@ Kinematics::Kinematics() : device(DeviceType::CPU) {
 Kinematics::~Kinematics() {}
 
 void Kinematics::setDevice(DeviceType device) { this->device = device; }
-vector<float> Kinematics::forward(const vector<float>& jointPosition) {
+vector<float> Kinematics::forward(vector<float> jointPosition) {
     return this->forward(jointPosition, this->device);
 }
 
-vector<float> Kinematics::forward(const vector<float>& jointPosition,
+vector<float> Kinematics::forward(vector<float> jointPosition,
                                   DeviceType device) {
     this->M = (device == DeviceType::CPU) ? &M_cpu : &M_gpu;
     this->S = (device == DeviceType::CPU) ? &S_cpu : &S_gpu;
-}
 
+    Tensor res = torch::eye(4, device);
+    Tensor theta =
+        torch::from_blob(jointPosition.data(), {int(jointPosition.size())},
+                         torch::TensorOptions().dtype(torch::kFloat));
+    Tensor STheta = S->clone().detach();
+    for (int i = 0; i < 6; i++) {
+        res = matmul(res, (STheta[i] * theta[i]).matrix_exp());
+    }
+    res = matmul(res, *M);
+    // cout << res;
+    return vector<float>();
+}
 Tensor Kinematics::SCalculate(Tensor SList) {
     Tensor res;
 
@@ -101,9 +115,8 @@ Tensor Kinematics::SCalculate(Tensor SList) {
             res = tmp.unsqueeze(0);
             continue;
         }
-        res = cat({res, tmp.unsqueeze(0)}, 2);
+        res = cat({res, tmp.unsqueeze(0)}, 0);
     }
 
-    cout << res;
     return res;
 }
