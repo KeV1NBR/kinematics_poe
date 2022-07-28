@@ -7,6 +7,8 @@
 
 #include <iostream>
 
+#include "math_tool.h"
+
 using namespace std;
 using namespace torch;
 
@@ -62,12 +64,18 @@ Tensor TM_SList() {
 
 Kinematics::Kinematics() : device(DeviceType::CPU) {
     M_cpu = TM_M();
-    //    M_gpu = M_cpu.cuda();
+    M_gpu = M_cpu.cuda();
 
     Tensor SList = TM_SList();
 
     S_cpu = SCalculate(TM_SList());
-    //    S_gpu = S_cpu.cuda();
+    S_gpu = S_cpu.cuda();
+
+    Tensor test = tensor({{1.f, 0.f, 0.f, 0.f},
+                          {0.f, 0.f, -1.f, 0.f},
+                          {0.f, 1.f, 0.f, 3.f},
+                          {0.f, 0.f, 0.f, 1.f}});
+    cout << adj(test);
 
     this->M = &M_cpu;
     this->S = &S_cpu;
@@ -88,12 +96,11 @@ vector<float> Kinematics::forward(vector<float> jointPosition,
     Tensor theta =
         torch::from_blob(jointPosition.data(), {int(jointPosition.size())},
                          torch::TensorOptions().dtype(torch::kFloat));
-    Tensor STheta = S->clone().detach();
     for (int i = 0; i < 6; i++) {
-        res = matmul(res, (STheta[i] * theta[i]).matrix_exp());
+        res = matmul(res, (S->index({i}) * theta[i]).matrix_exp());
     }
     res = matmul(res, *M);
-    // cout << res;
+    cout << res;
     return vector<float>();
 }
 Tensor Kinematics::SCalculate(Tensor SList) {
