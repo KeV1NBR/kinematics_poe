@@ -1,12 +1,13 @@
-#include "kinematics.h"
-
+#include <ATen/core/TensorBody.h>
 #include <c10/core/DeviceType.h>
+#include <c10/core/DispatchKeySet.h>
 #include <c10/core/ScalarType.h>
 #include <c10/core/TensorOptions.h>
 #include <torch/csrc/autograd/generated/variable_factories.h>
 
 #include <iostream>
 
+#include "kinematics.h"
 #include "math_tool.h"
 
 using namespace std;
@@ -63,6 +64,10 @@ Tensor TM_SList() {
 }
 
 Kinematics::Kinematics() : device(DeviceType::CPU) {
+    this->eV = 0.001;
+    this->eOmega = 0.001;
+    this->maxIteration = 20;
+
     M_cpu = TM_M();
     M_gpu = M_cpu.cuda();
 
@@ -75,7 +80,6 @@ Kinematics::Kinematics() : device(DeviceType::CPU) {
                           {0.f, 0.f, -1.f, 0.f},
                           {0.f, 1.f, 0.f, 3.f},
                           {0.f, 0.f, 0.f, 1.f}});
-    cout << adj(test);
 
     this->M = &M_cpu;
     this->S = &S_cpu;
@@ -102,6 +106,23 @@ vector<float> Kinematics::forward(vector<float> jointPosition,
     res = matmul(res, *M);
     cout << res;
     return vector<float>();
+}
+
+Tensor Kinematics::forward(Tensor theta, DeviceType device) {
+    this->M = (device == DeviceType::CPU) ? &M_cpu : &M_gpu;
+    this->S = (device == DeviceType::CPU) ? &S_cpu : &S_gpu;
+    Tensor res = torch::eye(4, device);
+
+    for (int i = 0; i < 6; i++) {
+        res = matmul(res, (S->index({i}) * theta[i]).matrix_exp());
+    }
+    res = matmul(res, *M);
+
+    return res;
+}
+
+Tensor Kinematics::forward(Tensor theta) {
+    return this->forward(theta, this->device);
 }
 Tensor Kinematics::SCalculate(Tensor SList) {
     Tensor res;
