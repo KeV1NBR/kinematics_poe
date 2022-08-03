@@ -1,11 +1,11 @@
-#include "math_tool.h"
-
 #include <ATen/TensorIndexing.h>
 #include <ATen/core/TensorBody.h>
 #include <ATen/ops/matrix_exp.h>
 #include <c10/core/DeviceType.h>
 #include <c10/core/ScalarType.h>
 #include <c10/core/TensorOptions.h>
+
+#include "math_tool.h"
 
 using namespace std;
 using namespace torch;
@@ -62,7 +62,6 @@ Tensor so32SO3(Tensor so3) {
 
     // trR = 1 + 2cos(θ)
     float cosTheta = (torch::trace(so3).item<float>() - 1) / 2;
-    cout << "cosTheta" << cosTheta << endl;
 
     if (cosTheta >= 1) {
         return torch::zeros({3, 3}, option);

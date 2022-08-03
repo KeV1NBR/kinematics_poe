@@ -36,3 +36,5 @@ torch::Tensor SO32so3(torch::Tensor SO3);
 torch::Tensor SE32se3(torch::Tensor SE3);
 
 torch::Tensor adj(torch::Tensor T);
+
+bool isNearZero(float val);
