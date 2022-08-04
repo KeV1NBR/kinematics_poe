@@ -15,6 +15,12 @@ int main() {
 
     cout << vec2SE3(v) << endl;
     cout << SE32se3(vec2SE3(v)) << endl;
+    cout << se32SE3(SE32se3(vec2SE3(v))) << endl;
+
+    cout << se3Inverse(SE32se3(vec2SE3(v))) << endl;
+
+    cout << matmul(SE32se3(vec2SE3(v)), se3Inverse(SE32se3(vec2SE3(v))));
+
     // cout << km.jvp(theta, torch::DeviceType::CPU);
     // vector<float> pos = {M_PI_2, M_PI_2, M_PI_2, M_PI_2, M_PI_2, M_PI_2};
 

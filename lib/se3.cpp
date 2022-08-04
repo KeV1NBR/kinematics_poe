@@ -60,3 +60,42 @@ Tensor SE32se3(Tensor SE3) {
                           0);
     }
 }
+
+Tensor se32SE3(Tensor se3) {
+    TensorOptions option =
+        TensorOptions().dtype(kFloat).device(DeviceType::CPU);
+
+    Tensor R = se3.index({indexing::Slice(0, 3), indexing::Slice(0, 3)});
+    Tensor p = se3.index({indexing::Slice(0, 3), 3});
+
+    Tensor omegaMat = so32SO3(R);
+
+    if (omegaMat.equal(torch::zeros({3, 3}, option))) {
+        return torch::cat({torch::cat({omegaMat, p.unsqueeze(1)}, 1),
+                           torch::tensor({{0, 0, 0, 0}}, option)},
+                          0);
+    } else {
+        float theta = acos((trace(R) - 1.f) / 2.f).item<float>();
+        Tensor v = matmul(torch::eye(3, option) - omegaMat / 2.f +
+                              (1.f / theta - 1.f / tan(theta / 2.f) / 2.f) *
+                                  matmul(omegaMat, omegaMat) / theta,
+                          p);
+        return torch::cat({torch::cat({omegaMat, v.unsqueeze(1)}, 1),
+                           torch::tensor({{0, 0, 0, 0}}, option)},
+                          0);
+    }
+}
+
+Tensor se3Inverse(Tensor se3) {
+    TensorOptions option =
+        TensorOptions().dtype(kFloat).device(DeviceType::CPU);
+
+    Tensor Rt = se3.index({indexing::Slice(0, 3), indexing::Slice(0, 3)}).t();
+    Tensor p = se3.index({indexing::Slice(0, 3), 3});
+
+    Tensor Rtp = -1 * matmul(Rt, p);
+
+    return torch::cat({torch::cat({Rt, Rtp.unsqueeze(1)}, 1),
+                       torch::tensor({{0, 0, 0, 1}}, option)},
+                      0);
+}
