@@ -11,13 +11,13 @@ class Kinematics:
         self.ev = ev
 
         self.device = torch.device(device)
-        self.M = torch.tensor(M, dtype=float, device=self.device)
-        self.Slist = torch.tensor(Slist, dtype=float, device=self.device)
+        self.M = torch.tensor(M, dtype=torch.float, device=self.device)
+        self.Slist = torch.tensor(Slist, dtype=torch.float, device=self.device)
 
     def forward(self, thetalist):
         thetalist = torch.as_tensor(thetalist,
                                     device=self.device,
-                                    dtype=float)
+                                    dtype=torch.float)
         is_batch = not (len(thetalist.shape) == 1)
         M = self.M
         Slist = self.Slist
@@ -43,7 +43,7 @@ class Kinematics:
 
     def inverse(self, goal, initial_guess=None):
         T = goal
-        thetalist0 = initial_guess if initial_guess is not None else np.zeros(5)
+        thetalist0 = initial_guess if initial_guess is not None else np.zeros(6)
         M = self.M.cpu().numpy()
         Slist = self.Slist.cpu().numpy()
         eomg = self.eomg
