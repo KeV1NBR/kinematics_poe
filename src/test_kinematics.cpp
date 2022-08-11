@@ -13,13 +13,14 @@ int main() {
         torch::tensor({1.57079632f, 0.f, 0.f, 0.f, 2.35619449f, 2.35619449f},
                       torch::DeviceType::CPU);
 
-    cout << vec2SE3(v) << endl;
-    cout << SE32se3(vec2SE3(v)) << endl;
-    cout << se32SE3(SE32se3(vec2SE3(v))) << endl;
+    cout << v << endl;
+    cout << vec2se3(v) << endl;
+    cout << se32SE3(vec2se3(v)) << endl;
+    cout << SE32se3(se32SE3(vec2se3(v))) << endl;
 
-    cout << se3Inverse(SE32se3(vec2SE3(v))) << endl;
+    cout << SE3Inverse(se32SE3(vec2se3(v))) << endl;
 
-    cout << matmul(SE32se3(vec2SE3(v)), se3Inverse(SE32se3(vec2SE3(v))));
+    cout << matmul(se32SE3(vec2se3(v)), SE3Inverse(se32SE3(vec2se3(v))));
 
     // cout << km.jvp(theta, torch::DeviceType::CPU);
     // vector<float> pos = {M_PI_2, M_PI_2, M_PI_2, M_PI_2, M_PI_2, M_PI_2};

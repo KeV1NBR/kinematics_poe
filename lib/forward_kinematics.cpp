@@ -104,7 +104,6 @@ vector<float> Kinematics::forward(vector<float> jointPosition,
         res = matmul(res, (S->index({i}) * theta[i]).matrix_exp());
     }
     res = matmul(res, *M);
-    cout << res;
     return vector<float>();
 }
 
