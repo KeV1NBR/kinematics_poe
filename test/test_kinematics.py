@@ -14,8 +14,8 @@ from robot_model import tm5_model
 M, Slist = tm5_model.getModel()
 km = Kinematics(M, Slist, "cpu")
 
-thetalist = torch.tensor([np.pi/2, np.pi/2, np.pi/2, np.pi/2, np.pi/2, np.pi/2], dtype=torch.float, device=km.M.device)
-initial = torch.tensor([np.pi/2-1, np.pi/2, np.pi/2, np.pi/2, np.pi/2, np.pi/2], dtype=torch.float, device=km.M.device)
+thetalist = torch.tensor([np.pi, 0, np.pi/2, 0, np.pi/2, 0], dtype=torch.float, device=km.M.device)
+initial = torch.tensor([np.pi, 0., 0., 0., 0., 0.], dtype=torch.float, device=km.M.device)
 
 pos = km.forward(thetalist)
 print(pos)
