@@ -1,7 +1,6 @@
 import sys
 sys.path.append('..')
 
-from time import time
 
 import numpy as np
 import torch
@@ -18,8 +17,10 @@ thetalist = torch.tensor([np.pi, 0, np.pi/2, 0, np.pi/2, 0], dtype=torch.float, 
 initial = torch.tensor([np.pi, 0., 0., 0., 0., 0.], dtype=torch.float, device=km.M.device)
 
 pos = km.forward(thetalist)
-print(pos)
+#print(pos)
 
 t, e = mr.IKinSpace(Slist, M, pos, initial, 0.001,0.001)
-print(t)
-print (km.forward(t))
+#print(t)
+#print (km.forward(t))
+
+km.maniEllips(thetalist)

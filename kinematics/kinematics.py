@@ -64,3 +64,14 @@ class Kinematics:
         err = np.linalg.norm([Vs[0], Vs[1], Vs[2]]) > eomg or np.linalg.norm([Vs[3], Vs[4], Vs[5]]) > ev
         return Vs, err
 
+    def maniEllips(self, thetaList):
+        np.set_printoptions(formatter={'float': '{: 0.3f}'.format})
+        SList = self.Slist.cpu().numpy()
+        J = mr.JacobianSpace(SList, thetaList.cpu().numpy())
+
+        A = np.dot(J[:3], J[:3].transpose())
+        Lambda, v = np.linalg.eig(A)
+
+        print(Lambda)
+        print(v)
+        return Lambda, v
