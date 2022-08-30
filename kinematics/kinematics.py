@@ -1,6 +1,6 @@
 import numpy as np
 import modern_robotics as mr
-import torch
+import tensorflow as tf
 from . import lie_algebra
 
 
@@ -10,18 +10,20 @@ class Kinematics:
         self.eomg = eomg
         self.ev = ev
 
-        self.device = torch.device(device)
-        self.M = torch.tensor(M, dtype=torch.float, device=self.device)
-        self.Slist = torch.tensor(Slist, dtype=torch.float, device=self.device)
+        self.device = tf.device(device)
+        self.kwargs = {
+        'dtype': float,
+        }
+
+
+        self.M = tf.Tensor(M, value_index= (), dtype = float)
+        self.Slist = tf.Tensor(Slist, **self.kwargs)
 
     def forward(self, thetalist):
-        thetalist = torch.as_tensor(thetalist,
-                                    device=self.device,
-                                    dtype=torch.float)
+        thetalist = tf.Tensor(thetalist, **self.kwargs)
         is_batch = not (len(thetalist.shape) == 1)
-        M = self.M
         Slist = self.Slist
-        T = M.clone()
+        T = tf.identity(self.M)
         n = len(thetalist)
         if is_batch:
             T = torch.repeat_interleave(T.unsqueeze(dim=0),
@@ -38,14 +40,14 @@ class Kinematics:
             s_theta = Slist_for_joint * theta_for_joint
             se3 = lie_algebra.VecTose3(s_theta)
             exp_res = lie_algebra.MatrixExp6(se3)
-            T = torch.matmul(exp_res, T)
+            T = tf.matmul(exp_res, T)
         return T
 
     def inverse(self, goal, initial_guess=None):
         T = goal
         thetalist0 = initial_guess if initial_guess is not None else np.zeros(6)
-        M = self.M.cpu().numpy()
-        Slist = self.Slist.cpu().numpy()
+        M = self.M.eval()
+        Slist = self.Slist.eval()
         eomg = self.eomg
         ev = self.ev
         thetalist = np.array(thetalist0).copy()
@@ -66,7 +68,7 @@ class Kinematics:
 
     def maniEllips(self, thetaList):
         np.set_printoptions(formatter={'float': '{: 0.3f}'.format})
-        SList = self.Slist.cpu().numpy()
+        SList = self.Slist.eval()
         J = mr.JacobianSpace(SList, thetaList.cpu().numpy())
 
         A = np.dot(J[:3], J[:3].transpose())
