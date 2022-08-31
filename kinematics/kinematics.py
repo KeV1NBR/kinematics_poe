@@ -11,32 +11,30 @@ class Kinematics:
         self.ev = ev
 
         self.device = tf.device(device)
-        self.kwargs = {
-        'dtype': float,
-        }
 
-
-        self.M = tf.Tensor(M, value_index= (), dtype = float)
-        self.Slist = tf.Tensor(Slist, **self.kwargs)
+        self.M = tf.convert_to_tensor(M, tf.float16)
+        self.Slist = tf.convert_to_tensor(Slist, tf.float16)
 
     def forward(self, thetalist):
-        thetalist = tf.Tensor(thetalist, **self.kwargs)
+        thetalist = tf.constant(thetalist, tf.float16)
+        print(thetalist)
         is_batch = not (len(thetalist.shape) == 1)
         Slist = self.Slist
         T = tf.identity(self.M)
         n = len(thetalist)
         if is_batch:
-            T = torch.repeat_interleave(T.unsqueeze(dim=0),
+            T = torch.repeat_interleave(tf.expand_dims(T, 0),
                                         len(thetalist),
                                         dim=0)
             n = thetalist.shape[1]
         for i in range(n - 1, -1, -1):
             if is_batch:
                 theta_for_joint = thetalist[:, i:i + 1]
-                Slist_for_joint = Slist[:, i].unsqueeze(dim=0)
+                Slist_for_joint = tf.expand_dims(Slist[:, i], 0)
             else:
                 theta_for_joint = thetalist[i]
                 Slist_for_joint = Slist[:, i]
+
             s_theta = Slist_for_joint * theta_for_joint
             se3 = lie_algebra.VecTose3(s_theta)
             exp_res = lie_algebra.MatrixExp6(se3)
@@ -68,7 +66,7 @@ class Kinematics:
 
     def maniEllips(self, thetaList):
         np.set_printoptions(formatter={'float': '{: 0.3f}'.format})
-        SList = self.Slist.eval()
+        SList = self.Slist.numpy()
         J = mr.JacobianSpace(SList, thetaList.cpu().numpy())
 
         A = np.dot(J[:3], J[:3].transpose())

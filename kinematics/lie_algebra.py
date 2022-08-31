@@ -4,12 +4,11 @@ import numpy as np
 def VecToso3(omg):
     kwargs = {
         'dtype': omg.dtype,
-        'device': omg.device
     }
     if len(omg.shape) == 1:
-        return tf.Tensor([[0, -omg[2], omg[1]],
-                             [omg[2], 0, -omg[0]],
-                             [-omg[1], omg[0], 0]], **kwargs)
+        return tf.convert_to_tensor([[0., -omg[2], omg[1]],
+                                    [omg[2], 0., -omg[0]],
+                                    [-omg[1], omg[0], 0.]])
     assert len(omg.shape) == 2
     res = tf.zeros(len(omg), 3, 3, **kwargs)
 
@@ -25,13 +24,12 @@ def VecToso3(omg):
 def VecTose3(V):
     kwargs = {
         'dtype': V.dtype,
-        'device': V.device
     }
     if len(V.shape) == 1:
         so3_vec = VecToso3(V[:3])
-        next_v = V[3:].unsqueeze(dim=1)
+        next_v = tf.expand_dims(V[3:], 1)
         omega_and_v = tf.concat((so3_vec, next_v), 1)
-        row = tf.zeros(1, 4, **kwargs)
+        row = tf.zeros((1,4), **kwargs)
         res = tf.concat((omega_and_v, row), 0)
         return res
 
@@ -44,11 +42,10 @@ def VecTose3(V):
 def so3ToVec(so3mat):
     kwargs = {
         'dtype': so3mat.dtype,
-        'device': so3mat.device
     }
 
     if len(so3mat.shape) == 2:
-        return tf.Tensor([so3mat[2][1],
+        return tf.convert_to_tensor([so3mat[2][1],
                              so3mat[0][2],
                              so3mat[1][0]],
                             **kwargs)
@@ -62,10 +59,9 @@ def MatrixExp3(so3mat, eps=1e-6):
     omgtheta = so3ToVec(so3mat)
     kwargs = {
         'dtype': omgtheta.dtype,
-        'device': omgtheta.device
     }
     if len(omgtheta.shape) == 1:
-        if tf.norm(omgtheta).item() < eps:
+        if tf.norm(omgtheta) < eps:
             return tf.eye(3, **kwargs)
 
         theta = tf.norm(omgtheta)
@@ -92,15 +88,14 @@ def MatrixExp3(so3mat, eps=1e-6):
 def MatrixExp6(se3mat, eps=1e-6):
     kwargs = {
         'dtype': se3mat.dtype,
-        'device': se3mat.device
     }
     if len(se3mat.shape) == 2:
         omgtheta = so3ToVec(se3mat[:3, :3])
-        if tf.norm(omgtheta).item() < eps:
+        if tf.norm(omgtheta) < eps:
             I = tf.eye(3, **kwargs)
             v = se3mat[:3, 3:]
             res = tf.concat((I, v), 1)
-            last_row = tf.Tensor([[0, 0, 0, 1]], **kwargs)
+            last_row = tf.constant([[0, 0, 0, 1]], **kwargs)
             return tf.concat((res, last_row), 0)
         theta = tf.norm(omgtheta)
         omgmat = se3mat[:3, :3] / theta
@@ -113,9 +108,9 @@ def MatrixExp6(se3mat, eps=1e-6):
         composite_term = initial + cos_term + sin_term
         v = se3mat[:3, 3]
         res = tf.linalg.matvec(composite_term, v) / theta
-        res = res.unsqueeze(1)
+        res = tf.expand_dims(res, 1)
         res = tf.concat((exp3_mat, res), 1)
-        last_row = tf.Tensor([[0, 0, 0, 1]], **kwargs)
+        last_row = tf.constant([[0, 0, 0, 1]], **kwargs)
         res = tf.concat((res, last_row), 0)
         return res
 
