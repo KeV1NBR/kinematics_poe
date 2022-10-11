@@ -66,12 +66,12 @@ class Kinematics:
 
     def maniEllips(self, thetaList):
         np.set_printoptions(formatter={'float': '{: 0.3f}'.format})
-        SList = self.Slist.numpy()
-        J = mr.JacobianSpace(SList, thetaList.cpu().numpy())
+        SList = self.Slist
+        J = mr.JacobianSpace(SList, thetaList)
 
         A = np.dot(J[:3], J[:3].transpose())
-        Lambda, v = np.linalg.eig(A)
+        v, Lambda = np.linalg.eig(A)
 
-        print(Lambda)
-        print(v)
-        return Lambda, v
+        v = np.sqrt(v)
+
+        return v, Lambda

@@ -21,5 +21,4 @@ print(pos)
 t, e = mr.IKinSpace(Slist, M, pos, initial, 0.001,0.001)
 print(t)
 print (km.forward(t))
-
 #km.maniEllips(thetalist)
